@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .utils import GetArticle
 
-# TODO create login/user registration/logout functions http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html 
+# TODO create login/user registration/logout functions http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html
 # Create your views here.
 # Ref http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html
 
@@ -45,18 +45,19 @@ class Article(APIView):
 
     def post(self, request):
         url = request.data.get("url")
+        user = request.user
         if not url:
             return Response(
                 {"status": False, "error_message": "No url provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        article = GetArticle().save(url=url)
+        article = GetArticle(url=url, user=user).save()
         response = {"status": True}
-        if response:
+        if response and article:
             response.update(article)
             return Response(response)
         else:
-            response['status'] = False
+            response["status"] = False
         return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
