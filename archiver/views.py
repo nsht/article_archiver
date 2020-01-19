@@ -9,9 +9,11 @@ from django.contrib.auth import authenticate
 # drf imports
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import generics
+from rest_framework import generics, status
 from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
+
+from .utils import GetArticle
 
 # Create your views here.
 # Ref http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html
@@ -34,12 +36,27 @@ class GetArticles(View):
         return JsonResponse({"status": True, "articles": ["List of article objects"]})
 
 
-class Article(View):
+class Article(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request):
-        return JsonResponse({"status": True})
+        return JsonResponse({"status": True}, status=200)
 
     def post(self, request):
-        return JsonResponse({"status": True})
+        url = request.data.get("url")
+        if not url:
+            return Response(
+                {"status": False, "error_message": "No url provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        article = GetArticle().save(url=url)
+        response = {"status": True}
+        if response:
+            response.update(article)
+            return Response(response)
+        else:
+            response['status'] = False
+        return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class HealthCheck(APIView):
