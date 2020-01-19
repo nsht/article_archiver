@@ -15,6 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .utils import GetArticle
 
+# TODO create login/user registration/logout functions http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html 
 # Create your views here.
 # Ref http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html
 
