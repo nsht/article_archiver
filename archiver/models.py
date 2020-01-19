@@ -13,6 +13,9 @@ class ArticleList(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"User {self.user} | {self.article_id}"
+
 
 class Article(models.Model):
     url = models.CharField(max_length=2086)
@@ -26,4 +29,7 @@ class Article(models.Model):
     site_name = models.CharField(max_length=256, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Article {self.url}"
 
