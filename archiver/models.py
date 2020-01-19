@@ -5,6 +5,9 @@ from django.conf import settings
 
 
 class ArticleList(models.Model):
+    class Meta:
+        unique_together = ("user", "article_id")
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
     article_id = models.ForeignKey("Article", models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
