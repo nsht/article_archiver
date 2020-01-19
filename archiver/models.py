@@ -18,7 +18,7 @@ class Article(models.Model):
     byline = models.CharField(max_length=256, blank=True)
     content = models.TextField()
     textcontent = models.TextField()
-    lenght = models.IntegerField()
+    length = models.IntegerField()
     excerpt = models.CharField(max_length=1024, blank=True)
     site_name = models.CharField(max_length=256, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
