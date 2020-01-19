@@ -13,7 +13,6 @@ class GetArticle:
         self.article_hash = None
 
     def save(self):
-        # TODO: Store data in db
         # TODO: Add celery
         # TODO: Move url to settings/env variables
         # TODO: Error handling
@@ -32,7 +31,7 @@ class GetArticle:
         existing_article = self.check_existing_article(article_data)
         if existing_article:
             return existing_article[0]
-        # Replace none with empty string, since CharField do not have null=True,
+        # Replace none with empty string, since CharFields were not set with null=True,
         # this was done to prevent 2 empty states in a field (null or empty string)
         article_data = {k: v if v else "" for (k, v) in article_data.items()}
         article = Article(
