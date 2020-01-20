@@ -54,4 +54,3 @@ class GetArticle:
         ).hexdigest()
         existing_article = Article.objects.filter(article_hash=self.article_hash)
         return existing_article
-

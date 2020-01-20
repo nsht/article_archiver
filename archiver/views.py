@@ -5,7 +5,6 @@ from django.views import View
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 
-
 # drf imports
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,6 +13,7 @@ from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
 
 from .utils import GetArticle
+
 
 # TODO create login/user registration/logout functions http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html
 # Create your views here.
@@ -59,6 +59,19 @@ class Article(APIView):
         else:
             response["status"] = False
         return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class Login(APIView):
+    permission_classes = ()
+
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(username=username, password=password)
+        if user:
+            return Response({"token": user.auth_token.key})
+        else:
+            return Response({"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class HealthCheck(APIView):
