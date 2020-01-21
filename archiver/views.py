@@ -12,7 +12,7 @@ from rest_framework import generics, status
 from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
 
-from .utils import GetArticle
+from .utils import GetArticle, save_article, pre_process_article
 
 
 # TODO create login/user registration/logout functions http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html
@@ -51,7 +51,11 @@ class Article(APIView):
                 {"status": False, "error_message": "No url provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        article = GetArticle(url=url, user=user).save()
+        save_article.delay(url=url, user_id=user.id)
+        # TODO: Add caching to pre_process_article
+        article = pre_process_article(
+            url=url
+        )  # increases response time by 600-800 ms!!!
         response = {"status": True}
         if response and article:
             response.update(article)
@@ -71,7 +75,9 @@ class Login(APIView):
         if user:
             return Response({"token": user.auth_token.key})
         else:
-            return Response({"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class HealthCheck(APIView):

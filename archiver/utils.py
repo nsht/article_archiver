@@ -1,15 +1,19 @@
 import hashlib
 import json
+import pdb
 
 import requests
 from .models import Article, ArticleList
-import pdb
+from django.contrib.auth.models import User
+from celery import shared_task
+from newspaper import Article as newspaper_article
 
 
 class GetArticle:
-    def __init__(self, url, user):
+    def __init__(self, url, user_id):
         self.url = url
-        self.user = user
+        self.user_id = user_id
+        self.user = User.objects.filter(id=user_id).first()
         self.article_hash = None
 
     def save(self):
@@ -54,3 +58,20 @@ class GetArticle:
         ).hexdigest()
         existing_article = Article.objects.filter(article_hash=self.article_hash)
         return existing_article
+
+
+@shared_task
+def save_article(url, user_id):
+    return GetArticle(url=url, user_id=user_id).save()
+
+
+def pre_process_article(url):
+    article = newspaper_article(url)
+    article.download()
+    article.parse()
+    title = article.title
+    if title:
+        return {"title": title, "url": url}
+    else:
+        return {"url": url}
+
