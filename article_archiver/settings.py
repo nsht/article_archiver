@@ -122,3 +122,5 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     )
 }
+
+CELERY_BROKER_URL = 'amqp://localhost'
