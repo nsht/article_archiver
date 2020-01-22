@@ -12,7 +12,7 @@ from rest_framework import generics, status
 from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated
 
-from .utils import GetArticle, save_article, pre_process_article
+from .utils import save_article, pre_process_article, get_article
 
 
 # TODO create login/user registration/logout functions http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html
@@ -40,8 +40,17 @@ class GetArticles(View):
 class Article(APIView):
     permission_classes = (IsAuthenticated,)
 
+    # TODO: error handling for logged out user
+    # TODO: granular permissions
     def get(self, request):
-        return JsonResponse({"status": True}, status=200)
+        article_id = request.data.get("article_id")
+        user = request.user
+        article = get_article(article_id=article_id, user_id=user.id)
+        if not article:
+            return Response(response, status=status.HTTP_404_NOT_FOUND)
+        response = {"status": True}
+        response.update(article)
+        return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request):
         url = request.data.get("url")

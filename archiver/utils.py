@@ -8,8 +8,9 @@ from django.contrib.auth.models import User
 from celery import shared_task
 from newspaper import Article as newspaper_article
 
+from .serializers import ArticleSerializer
 
-class GetArticle:
+class ArticleUtils:
     def __init__(self, url, user_id):
         self.url = url
         self.user_id = user_id
@@ -17,7 +18,6 @@ class GetArticle:
         self.article_hash = None
 
     def save(self):
-        # TODO: Add celery
         # TODO: Move url to settings/env variables
         # TODO: Error handling
         # TODO: Caching
@@ -60,9 +60,16 @@ class GetArticle:
         return existing_article
 
 
+def get_article(article_id, user_id):
+    user_article = ArticleList.objects.filter(user=user_id, article_id=article_id).first()
+    article = Article.objects.get(id=user_article.article_id_id)
+    serializer = ArticleSerializer(article)
+    return serializer.data
+
+
 @shared_task
 def save_article(url, user_id):
-    return GetArticle(url=url, user_id=user_id).save()
+    return ArticleUtils(url=url, user_id=user_id).save()
 
 
 def pre_process_article(url):
