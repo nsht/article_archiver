@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from celery import shared_task
 from newspaper import Article as newspaper_article
 
-from .serializers import ArticleSerializer
+from .serializers import ArticleSerializer,ArticleListSerializer
 
 class ArticleUtils:
     def __init__(self, url, user_id):
@@ -66,6 +66,12 @@ def get_article(article_id, user_id):
     serializer = ArticleSerializer(article)
     return serializer.data
 
+def get_article_list(user_id,serializer_context):
+    print(user_id)
+    articles = ArticleList.objects.filter(user=user_id)
+    print(articles)
+    serializer = ArticleListSerializer(articles, many=True,context=serializer_context)
+    return serializer.data
 
 @shared_task
 def save_article(url, user_id):
