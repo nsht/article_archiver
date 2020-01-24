@@ -9,9 +9,10 @@ from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
-from .serializers import UserSerializer
+from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 
+from .serializers import UserSerializer
 from .utils import save_article, pre_process_article, get_article, get_article_list
 
 
@@ -90,11 +91,20 @@ class Login(APIView):
         password = request.data.get("password")
         user = authenticate(username=username, password=password)
         if user:
+            token, created = Token.objects.get_or_create(user=user)
             return Response({"token": user.auth_token.key})
         else:
             return Response(
                 {"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class Logout(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        request.user.auth_token.delete()
+        return Response({"status": True}, status=status.HTTP_200_OK)
 
 
 class HealthCheck(APIView):
