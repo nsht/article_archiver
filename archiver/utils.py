@@ -5,10 +5,17 @@ import pdb
 import requests
 from .models import Article, ArticleList
 from django.contrib.auth.models import User
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from django.core.cache import cache
+
 from celery import shared_task
 from newspaper import Article as newspaper_article
 
-from .serializers import ArticleSerializer,ArticleListSerializer
+from .serializers import ArticleSerializer, ArticleListSerializer
+
+CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
+
 
 class ArticleUtils:
     def __init__(self, url, user_id):
@@ -61,30 +68,45 @@ class ArticleUtils:
 
 
 def get_article(article_id, user_id):
-    user_article = ArticleList.objects.filter(user=user_id, article_id=article_id).first()
+    user_article = ArticleList.objects.filter(
+        user=user_id, article_id=article_id
+    ).first()
+    if not user_article:
+        return False
     article = Article.objects.get(id=user_article.article_id_id)
     serializer = ArticleSerializer(article)
     return serializer.data
 
-def get_article_list(user_id,serializer_context):
+
+def get_article_list(user_id, serializer_context):
     print(user_id)
     articles = ArticleList.objects.filter(user=user_id)
     print(articles)
-    serializer = ArticleListSerializer(articles, many=True,context=serializer_context)
+    serializer = ArticleListSerializer(articles, many=True, context=serializer_context)
     return serializer.data
+
 
 @shared_task
 def save_article(url, user_id):
     return ArticleUtils(url=url, user_id=user_id).save()
 
 
+def delete_article(article_id, user_id):
+    ArticleList.objects.filter(user=user_id, article_id=article_id).delete()
+    return True
+
+
 def pre_process_article(url):
-    article = newspaper_article(url)
-    article.download()
-    article.parse()
-    title = article.title
-    if title:
-        return {"title": title, "url": url}
-    else:
-        return {"url": url}
+    data = cache.get(url)
+    if not data:
+        article = newspaper_article(url)
+        article.download()
+        article.parse()
+        title = article.title
+        if title:
+            data = {"title": title, "url": url}
+        else:
+            data = {"url": url}
+        cache.set(url, data, timeout=CACHE_TTL)
+    return data
 
