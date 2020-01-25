@@ -13,6 +13,7 @@ Click==7.0
 cssselect==1.1.0
 decorator==4.4.1
 Django==3.0.1
+django-redis==4.11.0
 djangorestframework==3.11.0
 feedfinder2==0.0.4
 feedparser==5.2.1
@@ -40,6 +41,7 @@ python-dateutil==2.8.1
 pytz==2019.3
 PyYAML==5.2
 readability-lxml==0.7.1
+redis==3.3.11
 regex==2019.12.20
 requests==2.22.0
 requests-file==1.4.3
