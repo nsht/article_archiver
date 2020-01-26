@@ -32,13 +32,6 @@ class Index(APIView):
         return Response({"status": True, "data": ["Home Page"]})
 
 
-class UserCreate(generics.CreateAPIView):
-    # Exclude from authentication
-    authentication_classes = ()
-    permission_classes = ()
-    serializer_class = UserSerializer
-
-
 class GetArticles(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -92,6 +85,13 @@ class Article(APIView):
             return Response({"status": False})
         delete_article(article_id=article_id, user_id=user.id)
         return Response({"status": True})
+
+
+class UserCreate(generics.CreateAPIView):
+    # Exclude from authentication
+    authentication_classes = ()
+    permission_classes = ()
+    serializer_class = UserSerializer
 
 
 class Login(APIView):
