@@ -29,9 +29,15 @@ class ArticleUtils:
         # TODO: Error handling
         # TODO: Caching
         # TODO: Store RAW HTML
-        article_data = requests.get("http://localhost:3000", params={"url": self.url})
-        if article_data.status_code != 200:
-            return {}
+        key = f"readability_article|{self.url}"
+        article_data = cache.get(key)
+        if not article_data:
+            article_data = requests.get(
+                "http://localhost:3000", params={"url": self.url}
+            )
+            if article_data.status_code != 200:
+                return {}
+            cache.set(key, article_data, CACHE_TTL)
         article_data = article_data.json()
         article_id = self.get_article_id(article_data)
         print(article_id)
@@ -79,9 +85,7 @@ def get_article(article_id, user_id):
 
 
 def get_article_list(user_id, serializer_context):
-    print(user_id)
     articles = ArticleList.objects.filter(user=user_id)
-    print(articles)
     serializer = ArticleListSerializer(articles, many=True, context=serializer_context)
     return serializer.data
 
@@ -97,7 +101,8 @@ def delete_article(article_id, user_id):
 
 
 def pre_process_article(url):
-    data = cache.get(url)
+    key = f"pre_process_article|{url}"
+    data = cache.get(key)
     if not data:
         article = newspaper_article(url)
         article.download()
@@ -107,6 +112,6 @@ def pre_process_article(url):
             data = {"title": title, "url": url}
         else:
             data = {"url": url}
-        cache.set(url, data, timeout=CACHE_TTL)
+        cache.set(key, data, timeout=CACHE_TTL)
     return data
 
