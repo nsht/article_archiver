@@ -12,7 +12,7 @@ class ArticleList(models.Model):
     article_id = models.ForeignKey("Article", models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    # TODO: Add tag support
     def __str__(self):
         return f"User {self.user} | {self.article_id}"
 

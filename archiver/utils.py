@@ -27,7 +27,6 @@ class ArticleUtils:
     def save(self):
         # TODO: Move url to settings/env variables
         # TODO: Error handling
-        # TODO: Caching
         # TODO: Store RAW HTML
         key = f"readability_article|{self.url}"
         article_data = cache.get(key)
@@ -40,15 +39,15 @@ class ArticleUtils:
             cache.set(key, article_data, CACHE_TTL)
         article_data = article_data.json()
         article_id = self.get_article_id(article_data)
-        print(article_id)
-        print(ArticleList.objects.get_or_create(user=self.user, article_id=article_id))
+        ArticleList.objects.get_or_create(user=self.user, article_id=article_id)
+        # TODO: Add to elastic with article_list_id,user_id,datetime
         return article_data
 
     def get_article_id(self, article_data):
         existing_article = self.check_existing_article(article_data)
         if existing_article:
             return existing_article[0]
-        # Replace none with empty string, since CharFields were not set with null=True,
+        # Replacing none with empty string, since CharFields were not set with null=True,
         # this was done to prevent 2 empty states in a field (null or empty string)
         article_data = {k: v if v else "" for (k, v) in article_data.items()}
         article = Article(
