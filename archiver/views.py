@@ -13,7 +13,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import UserSerializer
-from .utils import save_article, pre_process_article, get_article, get_article_list
+from .utils import (
+    save_article,
+    pre_process_article,
+    get_article,
+    get_article_list,
+    delete_article,
+)
 
 
 # TODO create login/user registration/logout functions http://books.agiliq.com/projects/django-api-polls-tutorial/en/latest/access-control.html
@@ -24,13 +30,6 @@ from .utils import save_article, pre_process_article, get_article, get_article_l
 class Index(APIView):
     def get(self, request):
         return Response({"status": True, "data": ["Home Page"]})
-
-
-class UserCreate(generics.CreateAPIView):
-    # Exclude from authentication
-    authentication_classes = ()
-    permission_classes = ()
-    serializer_class = UserSerializer
 
 
 class GetArticles(APIView):
@@ -49,14 +48,14 @@ class Article(APIView):
     permission_classes = (IsAuthenticated,)
 
     # TODO: error handling for logged out user
-    # TODO: granular permissions
+    # TODO: granular permissions ???
     def get(self, request):
         article_id = request.data.get("article_id")
         user = request.user
 
-        article = get_article(article_id=article_id, user_id=user.id,)
+        article = get_article(article_id=article_id, user_id=user.id)
         if not article:
-            return Response(response, status=status.HTTP_404_NOT_FOUND)
+            return Response({"status": False}, status=status.HTTP_404_NOT_FOUND)
         response = {"status": True}
         response.update(article)
         return Response(response)
@@ -70,10 +69,7 @@ class Article(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         save_article.delay(url=url, user_id=user.id)
-        # TODO: Add caching to pre_process_article
-        article = pre_process_article(
-            url=url
-        )  # increases response time by 600-800 ms!!!
+        article = pre_process_article(url=url)
         response = {"status": True}
         if response and article:
             response.update(article)
@@ -81,6 +77,21 @@ class Article(APIView):
         else:
             response["status"] = False
         return Response(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request):
+        article_id = request.data.get("article_id")
+        user = request.user
+        if not article_id:
+            return Response({"status": False})
+        delete_article(article_id=article_id, user_id=user.id)
+        return Response({"status": True})
+
+
+class UserCreate(generics.CreateAPIView):
+    # Exclude from authentication
+    authentication_classes = ()
+    permission_classes = ()
+    serializer_class = UserSerializer
 
 
 class Login(APIView):
