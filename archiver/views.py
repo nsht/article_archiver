@@ -62,13 +62,14 @@ class Article(APIView):
 
     def post(self, request):
         url = request.data.get("url")
+        tags = request.data.get("tags")
         user = request.user
         if not url:
             return Response(
                 {"status": False, "error_message": "No url provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        save_article.delay(url=url, user_id=user.id)
+        save_article.delay(url=url, user_id=user.id, tags=tags)
         article = pre_process_article(url=url)
         response = {"status": True}
         if response and article:

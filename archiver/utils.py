@@ -3,7 +3,7 @@ import json
 import pdb
 
 import requests
-from .models import Article, ArticleList
+from .models import Article, ArticleList, Tags
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -18,11 +18,12 @@ CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
 
 
 class ArticleUtils:
-    def __init__(self, url, user_id):
+    def __init__(self, url, user_id, tags=[]):
         self.url = url
         self.user_id = user_id
         self.user = User.objects.filter(id=user_id).first()
         self.article_hash = None
+        self.tags = tags
 
     def save(self):
         # TODO: Move url to settings/env variables
@@ -39,7 +40,12 @@ class ArticleUtils:
             cache.set(key, article_data, CACHE_TTL)
         article_data = article_data.json()
         article_id = self.get_article_id(article_data)
-        ArticleList.objects.get_or_create(user=self.user, article_id=article_id)
+        article_list_id = ArticleList.objects.get_or_create(
+            user=self.user, article_id=article_id
+        )[0]
+        for tag in self.tags:
+            Tags.objects.get_or_create(user_article_id=article_list_id, tag=tag)
+
         # TODO: Add to elastic with article_list_id,user_id,datetime
         return article_data
 
@@ -90,8 +96,8 @@ def get_article_list(user_id, serializer_context):
 
 
 @shared_task
-def save_article(url, user_id):
-    return ArticleUtils(url=url, user_id=user_id).save()
+def save_article(url, user_id, tags):
+    return ArticleUtils(url=url, user_id=user_id, tags=tags).save()
 
 
 def delete_article(article_id, user_id):
