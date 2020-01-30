@@ -40,11 +40,13 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "archiver.apps.ArchiverConfig",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -138,3 +140,6 @@ CACHES = {
 }
 
 ARTICLE_CACHE_TTL = 60 * 60 * 12  # 12 hours
+
+#cors
+CORS_ORIGIN_ALLOW_ALL = True
