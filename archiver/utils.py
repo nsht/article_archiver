@@ -40,11 +40,16 @@ class ArticleUtils:
             cache.set(key, article_data, CACHE_TTL)
         article_data = article_data.json()
         article_id = self.get_article_id(article_data)
+
+        if not article_id:
+            return article_data
+
         article_list_id = ArticleList.objects.get_or_create(
-            user=self.user, article_id=article_id
+            user=self.user, article_data=article_id
         )[0]
-        for tag in self.tags:
-            Tags.objects.get_or_create(user_article_id=article_list_id, tag=tag)
+        if self.tags:
+            for tag in self.tags:
+                Tags.objects.get_or_create(user_article_id=article_list_id, tag=tag)
 
         # TODO: Add to elastic with article_list_id,user_id,datetime
         return article_data
@@ -56,6 +61,9 @@ class ArticleUtils:
         # Replacing none with empty string, since CharFields were not set with null=True,
         # this was done to prevent 2 empty states in a field (null or empty string)
         article_data = {k: v if v else "" for (k, v) in article_data.items()}
+        metadata = pre_process_article(self.url)
+        word_count = len(article_data.get("content", "").split(" "))
+        estimated_reading_time = estimate_reading_time(word_count)
         article = Article(
             url=self.url,
             article_hash=self.article_hash,
@@ -66,6 +74,11 @@ class ArticleUtils:
             length=article_data["length"],
             excerpt=article_data["excerpt"],
             site_name=article_data["siteName"],
+            publication_date=metadata.get("publish_date", ""),
+            top_image=metadata.get("top_image", ""),
+            favicon=metadata.get("favicon"),
+            word_count=word_count,
+            estimated_reading_time=estimated_reading_time,
         ).save()
 
         return article
@@ -80,7 +93,7 @@ class ArticleUtils:
 
 def get_article(article_id, user_id):
     user_article = ArticleList.objects.filter(
-        user=user_id, article_id=article_id
+        user=user_id, article_data=article_id
     ).first()
     if not user_article:
         return False
@@ -101,7 +114,7 @@ def save_article(url, user_id, tags):
 
 
 def delete_article(article_id, user_id):
-    ArticleList.objects.filter(user=user_id, article_id=article_id).delete()
+    ArticleList.objects.filter(user=user_id, article_data=article_id).delete()
     return True
 
 
@@ -112,11 +125,28 @@ def pre_process_article(url):
         article = newspaper_article(url)
         article.download()
         article.parse()
-        title = article.title
-        if title:
-            data = {"title": title, "url": url}
+        if article.canonical_link:
+            canonical_link = article.canonical_link
         else:
-            data = {"url": url}
+            canonical_link = url
+        title = article.title
+        data = {}
+        data["publish_date"] = article.publish_date
+        data["url"] = canonical_link
+        if title:
+            data["title"] = title
+        if article.has_top_image:
+            data["top_image"] = article.top_image
+        if article.meta_favicon:
+            if "http" in article.meta_favicon:
+                data["favicon"] = article.meta_favicon
+            else:
+                data["favicon"] = article.source_url + article.meta_favicon
         cache.set(key, data, timeout=CACHE_TTL)
     return data
+
+
+def estimate_reading_time(total_words):
+    WPM = 200
+    return total_words / WPM
 
