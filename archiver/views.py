@@ -69,8 +69,10 @@ class Article(APIView):
                 {"status": False, "error_message": "No url provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        save_article.delay(url=url, user_id=user.id, tags=tags)
         article = pre_process_article(url=url)
+        # replace user entered url with canonical url
+        url = article.get('url',url)
+        save_article.delay(url=url, user_id=user.id, tags=tags)
         response = {"status": True}
         if response and article:
             response.update(article)
