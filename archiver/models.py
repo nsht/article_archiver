@@ -6,17 +6,17 @@ from django.conf import settings
 
 class ArticleList(models.Model):
     class Meta:
-        unique_together = ("user", "article_id")
+        unique_together = ("user", "article_data")
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
-    article_id = models.ForeignKey("Article", models.SET_NULL, blank=True, null=True)
+    article_data = models.ForeignKey("Article", models.SET_NULL, blank=True, null=True)
     archived = models.BooleanField(default=True)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # TODO: Add tag support
     def __str__(self):
-        return f"User {self.user} | {self.article_id}"
+        return f"User {self.user} | {self.article_data}"
 
 
 class Tags(models.Model):

@@ -35,14 +35,25 @@ class ArticleSerializer(serializers.ModelSerializer):
 class ArticleListDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
-        fields = ["title", "length", "site_name"]
+        fields = [
+            "id",
+            "title",
+            "length",
+            "site_name",
+            "word_count",
+            "top_image",
+            "favicon",
+            "estimated_reading_time",
+            "publication_date",
+            "created_at",
+        ]
 
 
 class ArticleListSerializer(serializers.ModelSerializer):
-    article_id = ArticleListDetailSerializer()
+    article_data = ArticleListDetailSerializer()
 
     class Meta:
         model = ArticleList
-        fields = ["created_at", "article_id"]
+        fields = ["created_at", "article_data"]
         depth = 1
 
