@@ -29,6 +29,7 @@ class Tags(models.Model):
 
 
 class Article(models.Model):
+    # TODO: Add authors, base site, meta data
     url = models.CharField(max_length=2086)
     article_hash = models.CharField(max_length=1024)
     title = models.CharField(max_length=256, blank=True)
@@ -37,6 +38,9 @@ class Article(models.Model):
     textcontent = models.TextField()
     length = models.IntegerField()
     word_count = models.IntegerField(null=True)
+    top_image = models.CharField(max_length=2086, null=True)
+    favicon = models.CharField(max_length=2086, null=True)
+    estimated_reading_time = models.IntegerField(null=True)
     excerpt = models.CharField(max_length=1024, blank=True)
     site_name = models.CharField(max_length=256, blank=True)
     publication_date = models.DateTimeField(null=True, blank=True)
