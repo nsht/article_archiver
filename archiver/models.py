@@ -36,6 +36,7 @@ class Article(models.Model):
     content = models.TextField()
     textcontent = models.TextField()
     length = models.IntegerField()
+    word_count = models.IntegerField(null=True)
     excerpt = models.CharField(max_length=1024, blank=True)
     site_name = models.CharField(max_length=256, blank=True)
     publication_date = models.DateTimeField(null=True, blank=True)
