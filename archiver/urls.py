@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.Index.as_view(), name="index"),
     path("healthcheck/", views.HealthCheck.as_view(), name="healthcheck"),
     path("article/", views.Article.as_view(), name="article"),
+    path("article/<int:article_id>", views.Article.as_view(), name="article"),
     path("article_list/", views.GetArticles.as_view(), name="article_list"),
     # user
     path("user/", views.UserCreate.as_view(), name="usercreate"),

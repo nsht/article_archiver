@@ -97,7 +97,7 @@ def get_article(article_id, user_id):
     ).first()
     if not user_article:
         return False
-    article = Article.objects.get(id=user_article.article_id_id)
+    article = Article.objects.get(id=user_article.article_data_id)
     serializer = ArticleSerializer(article)
     return serializer.data
 
