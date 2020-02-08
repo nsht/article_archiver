@@ -18,12 +18,13 @@ CACHE_TTL = getattr(settings, "CACHE_TTL", DEFAULT_TIMEOUT)
 
 
 class ArticleUtils:
-    def __init__(self, url, user_id, tags=[]):
+    def __init__(self, url, user_id, tags=[], articlelist_id=None):
         self.url = url
         self.user_id = user_id
         self.user = User.objects.filter(id=user_id).first()
         self.article_hash = None
         self.tags = tags
+        self.articlelist_id = articlelist_id
 
     def save(self):
         # TODO: Move url to settings/env variables
@@ -39,23 +40,23 @@ class ArticleUtils:
                 return {}
             cache.set(key, article_data, CACHE_TTL)
         article_data = article_data.json()
-        article_id = self.get_article_id(article_data)
 
+        article_id = self.get_article_id(article_data)
         if not article_id:
             return article_data
+        article_list = ArticleList.objects.filter(id=self.articlelist_id)
+        article_list.update(article_data=article_id)
 
-        article_list_id = ArticleList.objects.get_or_create(
-            user=self.user, article_data=article_id
-        )[0]
         if self.tags:
             for tag in self.tags:
-                Tags.objects.get_or_create(user_article_id=article_list_id, tag=tag)
+                Tags.objects.get_or_create(user_article_id=article_list[0], tag=tag)
 
         # TODO: Add to elastic with article_list_id,user_id,datetime
         return article_data
 
     def get_article_id(self, article_data):
         existing_article = self.check_existing_article(article_data)
+
         if existing_article:
             return existing_article[0]
         # Replacing none with empty string, since CharFields were not set with null=True,
@@ -79,7 +80,8 @@ class ArticleUtils:
             favicon=metadata.get("favicon"),
             word_count=word_count,
             estimated_reading_time=estimated_reading_time,
-        ).save()
+        )
+        article.save()
 
         return article
 
@@ -109,8 +111,10 @@ def get_article_list(user_id, serializer_context):
 
 
 @shared_task
-def save_article(url, user_id, tags):
-    return ArticleUtils(url=url, user_id=user_id, tags=tags).save()
+def save_article(url, user_id, tags, articlelist_id):
+    return ArticleUtils(
+        url=url, user_id=user_id, tags=tags, articlelist_id=articlelist_id
+    ).save()
 
 
 def delete_article(article_id, user_id):
@@ -118,7 +122,7 @@ def delete_article(article_id, user_id):
     return True
 
 
-def pre_process_article(url):
+def pre_process_article(url, user=None, save=False):
     key = f"pre_process_article|{url}"
     data = cache.get(key)
     if not data:
@@ -142,7 +146,17 @@ def pre_process_article(url):
                 data["favicon"] = article.meta_favicon
             else:
                 data["favicon"] = article.source_url + article.meta_favicon
+        if save:
+            article_list = ArticleList.objects.get_or_create(
+                user=user, url=canonical_link
+            )[0]
+
+            data["id"] = article_list.id
+            save = False
         cache.set(key, data, timeout=CACHE_TTL)
+    if save:
+        article_list = ArticleList.objects.get_or_create(user=user, url=data["url"])[0]
+        data["id"] = article_list.id
     return data
 
 

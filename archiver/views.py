@@ -49,7 +49,7 @@ class Article(APIView):
 
     # TODO: error handling for logged out user
     # TODO: granular permissions ???
-    def get(self, request,article_id):
+    def get(self, request, article_id):
         user = request.user
 
         article = get_article(article_id=article_id, user_id=user.id)
@@ -68,10 +68,12 @@ class Article(APIView):
                 {"status": False, "error_message": "No url provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        article = pre_process_article(url=url)
+        article = pre_process_article(url=url,user=user, save=True)
         # replace user entered url with canonical url
         url = article.get("url", url)
-        save_article.delay(url=url, user_id=user.id, tags=tags)
+        save_article.delay(
+            url=url, user_id=user.id, tags=tags, articlelist_id=article["id"]
+        )
         response = {"status": True}
         if response and article:
             response.update(article)
