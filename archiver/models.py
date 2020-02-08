@@ -14,6 +14,8 @@ class ArticleList(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    url = models.CharField(max_length=2086)
+
     # TODO: Add tag support
     def __str__(self):
         return f"User {self.user} | {self.article_data}"
