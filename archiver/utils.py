@@ -52,7 +52,7 @@ class ArticleUtils:
                 Tags.objects.get_or_create(user_article_id=article_list[0], tag=tag)
 
         # TODO: Add to elastic with article_list_id,user_id,datetime
-        return article_data
+        return True
 
     def get_article_id(self, article_data):
         existing_article = self.check_existing_article(article_data)
