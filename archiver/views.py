@@ -1,4 +1,5 @@
 import pdb
+import datetime
 
 from django.http import HttpResponse
 from django.views import View
@@ -68,15 +69,17 @@ class Article(APIView):
                 {"status": False, "error_message": "No url provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        article = pre_process_article(url=url,user=user, save=True)
+        article = pre_process_article(url=url, user=user, save=True)
         # replace user entered url with canonical url
         url = article.get("url", url)
         save_article.delay(
             url=url, user_id=user.id, tags=tags, articlelist_id=article["id"]
         )
         response = {"status": True}
+        article_data = {"article_data": article}
+        article_data["created_at"] = datetime.datetime.now().isoformat()
         if response and article:
-            response.update(article)
+            response.update(article_data)
             return Response(response)
         else:
             response["status"] = False
