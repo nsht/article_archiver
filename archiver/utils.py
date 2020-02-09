@@ -34,7 +34,7 @@ class ArticleUtils:
         article_data = cache.get(key)
         if not article_data:
             article_data = requests.get(
-                "http://localhost:3000", params={"url": self.url}
+                "http://localhost:3002", params={"url": self.url}
             )
             if article_data.status_code != 200:
                 return {}
@@ -105,7 +105,7 @@ def get_article(article_id, user_id):
 
 
 def get_article_list(user_id, serializer_context):
-    articles = ArticleList.objects.filter(user=user_id)
+    articles = ArticleList.objects.filter(user=user_id).order_by("-updated_at")
     serializer = ArticleListSerializer(articles, many=True, context=serializer_context)
     return serializer.data
 
