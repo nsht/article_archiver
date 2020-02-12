@@ -25,7 +25,7 @@ class Tags(models.Model):
     class Meta:
         unique_together = ("user_article_id", "tag")
 
-    user_article_id = models.ForeignKey(ArticleList, on_delete=models.CASCADE,)
+    user_article = models.ForeignKey(ArticleList, on_delete=models.CASCADE,)
     tag = models.CharField(max_length=256)
     created_at = models.DateTimeField(auto_now_add=True)
 
