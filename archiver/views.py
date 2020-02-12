@@ -20,6 +20,7 @@ from .utils import (
     get_article,
     get_article_list,
     delete_article,
+    add_tags,
 )
 
 
@@ -122,6 +123,31 @@ class Logout(APIView):
 
     def post(self, request):
         request.user.auth_token.delete()
+        return Response({"status": True}, status=status.HTTP_200_OK)
+
+
+class Tags(APIView):
+    """
+    Class to handle tagging user level articles
+    post request format
+    {
+        "tags":["tag1","tag2"]
+        "article_list_id": 123
+    }
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        tags = request.data.get("tags", [])
+        article_list_id = request.data.get("article_list_id")
+        if not all([tags, article_list_id]):
+            return Response({"status": False}, status=status.HTTP_400_BAD_REQUEST)
+        response = add_tags(tags=tags, article_list_id=article_list_id)
+        if not response:
+            return Response(
+                {"status": False}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         return Response({"status": True}, status=status.HTTP_200_OK)
 
 

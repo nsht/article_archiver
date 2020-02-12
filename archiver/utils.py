@@ -49,7 +49,7 @@ class ArticleUtils:
 
         if self.tags:
             for tag in self.tags:
-                Tags.objects.get_or_create(user_article_id=article_list[0], tag=tag)
+                Tags.objects.get_or_create(user_article=article_list[0], tag=tag)
 
         # TODO: Add to elastic with article_list_id,user_id,datetime
         return True
@@ -105,6 +105,7 @@ def get_article(article_id, user_id):
 
 
 def get_article_list(user_id, serializer_context):
+    # TODO Figure out how to add tags to this list
     articles = ArticleList.objects.filter(user=user_id).order_by("-updated_at")
     serializer = ArticleListSerializer(articles, many=True, context=serializer_context)
     return serializer.data
@@ -164,3 +165,9 @@ def estimate_reading_time(total_words):
     WPM = 200
     return total_words / WPM
 
+
+def add_tags(tags, article_list_id):
+    ArticleList_object = ArticleList.objects.filter(id=article_list_id).first()
+    for tag in tags:
+        Tags.objects.get_or_create(user_article=ArticleList_object, tag=tag)
+    return True
