@@ -1,7 +1,30 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
+
+
+class UserExtended(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email_verified = models.BooleanField(default=False)
+    tos_accepted = models.BooleanField(default=False)
+    tos_accept_date = models.DateTimeField(null=True)
+    gdpr_consent = models.BooleanField(default=False)
+    account_tier = models.CharField(max_length=256)
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserExtended.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.UserExtended.save()
 
 
 class ArticleList(models.Model):
