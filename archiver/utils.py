@@ -34,7 +34,7 @@ class ArticleUtils:
         article_data = cache.get(key)
         if not article_data:
             article_data = requests.get(
-                "http://localhost:3002", params={"url": self.url}
+                "http://51.15.213.116:3002/", params={"url": self.url}
             )
             if article_data.status_code != 200:
                 return {}
