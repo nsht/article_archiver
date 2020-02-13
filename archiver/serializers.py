@@ -5,6 +5,8 @@ from rest_framework.authtoken.models import Token
 
 
 class UserSerializer(serializers.ModelSerializer):
+    # TODO create UserExtended serializer
+    # https://stackoverflow.com/questions/33659994/django-rest-framework-create-user-and-user-profile
     class Meta:
         model = User
         fields = ("username", "email", "password")
@@ -13,6 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User(email=validated_data["email"], username=validated_data["username"])
         user.set_password(validated_data["password"])
+        # user.UserExtended.tos_accepted =
         user.save()
         Token.objects.create(user=user)
         return user
