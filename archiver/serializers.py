@@ -1,10 +1,18 @@
+import datetime
 from django.contrib.auth.models import User
 from .models import *
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
 
+class UserExtendedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserExtended
+        fields = ["tos_accepted"]
+
+
 class UserSerializer(serializers.ModelSerializer):
+    # extended = UserExtendedSerializer(required=True)
     # TODO create UserExtended serializer
     # https://stackoverflow.com/questions/33659994/django-rest-framework-create-user-and-user-profile
     class Meta:
@@ -15,7 +23,6 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User(email=validated_data["email"], username=validated_data["username"])
         user.set_password(validated_data["password"])
-        # user.UserExtended.tos_accepted =
         user.save()
         Token.objects.create(user=user)
         return user
