@@ -54,7 +54,7 @@ class Article(APIView):
     def get(self, request, article_id):
         user = request.user
 
-        article = get_article(article_id=article_id, user_id=user.id)
+        article = get_article(article_list_id=article_id, user_id=user.id)
         if not article:
             return Response({"status": False}, status=status.HTTP_404_NOT_FOUND)
         response = {"status": True}

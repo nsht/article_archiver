@@ -93,10 +93,8 @@ class ArticleUtils:
         return existing_article
 
 
-def get_article(article_id, user_id):
-    user_article = ArticleList.objects.filter(
-        user=user_id, article_data=article_id
-    ).first()
+def get_article(article_list_id, user_id):
+    user_article = ArticleList.objects.filter(user=user_id, id=article_list_id).first()
     if not user_article:
         return False
     article = Article.objects.get(id=user_article.article_data_id)
