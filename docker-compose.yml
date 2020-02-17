@@ -7,5 +7,19 @@ services:
     container_name: article_archiver_api
     volumes:
       - .:/article_archiver_api
+    links:
+      - redis:redis 
     ports:
       - "8000:8000"
+
+  redis:
+    restart: always
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redisdata:/data
+
+volumes:
+  redisdata:
