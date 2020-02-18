@@ -8,7 +8,8 @@ services:
     volumes:
       - .:/article_archiver_api
     links:
-      - redis:redis 
+      - redis:redis
+      - rabbitmq:rabbitmq
     ports:
       - "8000:8000"
 
@@ -20,6 +21,13 @@ services:
 
     volumes:
       - redisdata:/data
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
 
 volumes:
   redisdata:
