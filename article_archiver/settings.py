@@ -125,7 +125,7 @@ REST_FRAMEWORK = {
     )
 }
 
-CELERY_BROKER_URL = "amqp://localhost"
+CELERY_BROKER_URL = "amqp://rabbitmq"
 
 CACHES = {
     "default": {
