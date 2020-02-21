@@ -3,7 +3,7 @@ version: "3"
 services:
   web:
     build: .
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py runserver 0.0.0.0:8000"
     container_name: article_archiver_api
     volumes:
       - .:/article_archiver_api
@@ -12,6 +12,8 @@ services:
       - rabbitmq:rabbitmq
     ports:
       - "8000:8000"
+    env_file:
+      - ./.env.dev
 
   redis:
     restart: always
@@ -29,5 +31,15 @@ services:
       - 5672:5672
       - 15672:15672
 
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=hello_django
+      - POSTGRES_PASSWORD=hello_django
+      - POSTGRES_DB=hello_django_dev
+
 volumes:
   redisdata:
+  postgres_data:
