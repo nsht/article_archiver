@@ -66,4 +66,3 @@ class ArticleListSerializer(serializers.ModelSerializer):
         model = ArticleList
         fields = ["created_at", "id", "article_data"]
         depth = 1
-

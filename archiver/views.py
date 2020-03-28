@@ -50,7 +50,7 @@ class Article(APIView):
     permission_classes = (IsAuthenticated,)
 
     # TODO: error handling for logged out user
-    # TODO: granular permissions ???
+    # TODO: granular permissions
     def get(self, request, article_id):
         user = request.user
 

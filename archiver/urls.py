@@ -8,7 +8,7 @@ urlpatterns = [
     path("article/", views.Article.as_view(), name="article"),
     path("article/<int:article_id>", views.Article.as_view(), name="article"),
     path("article_list/", views.GetArticles.as_view(), name="article_list"),
-    path("tags/",views.Tags.as_view(),name="tags"),
+    path("tags/", views.Tags.as_view(), name="tags"),
     # user
     path("user/", views.UserCreate.as_view(), name="usercreate"),
     path("login/", views.Login.as_view(), name="login"),
