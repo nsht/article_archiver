@@ -15,7 +15,7 @@ decorator==4.4.1
 Django==3.0.14
 django-cors-headers==3.2.1
 django-redis==4.11.0
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 feedfinder2==0.0.4
 feedparser==5.2.1
 idna==2.8
