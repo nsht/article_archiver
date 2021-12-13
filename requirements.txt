@@ -25,7 +25,7 @@ ipython-genutils==0.2.0
 jedi==0.15.2
 jieba3k==0.35.1
 kombu==4.6.7
-lxml==4.4.2
+lxml==4.6.5
 more-itertools==8.1.0
 newspaper3k==0.2.8
 nltk==3.4.5
